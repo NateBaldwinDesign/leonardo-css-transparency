@@ -3,7 +3,9 @@
 Authors **color scales** and **contrast swatches**, then generates a **CSS-only dynamic
 color palette**: each color is produced from its scale to hit a target contrast against the
 container's background, at paint time. Compares this "Dynamic" approach against the two old
-ways (opaque scale pick, CSS opacity). Built per `ENHANCEMENT-PLAN.md`.
+ways (opaque scale pick, CSS opacity). Surface design is documented in `SURFACES-PLAN.md`; a
+full, portable spec for reimplementing these concepts lives in `knowledge-transfer/` (start at
+`AGENTS.md`).
 
 ## The core idea
 
@@ -16,26 +18,28 @@ function, which would break the CSS-only purpose.)
 
 ## The tool
 
-Three columns: **left controls · main (palette + preview) · right detail panel**.
+Two columns: **left controls · main stage (palette + preview)**. There is no separate right panel;
+the detail strip lives inside the Contextual-evaluation tab.
 
-**Left — two tabs under the Background input:**
-- **Contrast swatches** — target-ratio sliders, auto-sorted low→high, exported as
-  `--contrast-100/200/300…` (renumbered by position on delete; min 1). Default 1.4/3/4.5/7.
-  Selecting/dragging one makes it the *active* contrast (drives the preview + detail panel).
+**Left — three tabs under the Background input:**
+- **Contrast swatches** — target-ratio sliders (step 0.01), auto-sorted low→high, exported as
+  `--contrast-100/200/300…` (renumbered by position on delete; min 1). Default ladder:
+  `1.06, 1.15, 1.32, 1.6, 2, 2.6, 3.22, 3.95, 4.79, 6.29, 7.9, 10, 12.3, 14.8, 17, 19.5`.
+  Selecting/dragging one makes it the *active* contrast (drives the preview + detail strip).
 - **Color scales** — a global settings block on top (**Contrast side**, **Extremity offset**,
   **Extremity × contrast**), then a stacked, named, add/removable scale list. Selecting a scale
   opens its gradient + stop editor (hue / chroma / lightness, add/delete stop). New scale =
   an empty grayscale (one chroma-0 stop) you then color; deleting the last scale resets it to
   one gray stop (name kept). *No
   intended/source markers in this editor.*
-- **Surfaces** — named backgrounds. The **base** (`bg`, from the Background input above; not
-  deletable) plus added surfaces, each defined by a **contrast relative to the previous layer**.
-  Surfaces go **lighter by default**, automatically **swapping darker** when the lighter side
-  caps (e.g. a white base), with a per-surface **force darker** override. They keep the theme
-  hue (blend toward white/black). Each is renameable (rename sets its CSS var). Exported as a
-  chained `:root` block (`--_s0…N` with the contrast/polarity logic in the CSS, plus public
-  `--bg`, `--layer-1`, … aliases) so the surfaces self-compute — assign one to `--bg` on a
-  container.
+- **Surfaces** — named backgrounds (the "Surfaces v2" model; see `SURFACES-PLAN.md`). The **base**
+  (`bg`, from the Background input; not deletable) plus surface **types**, each defined by
+  **tint × reference × contrast**: a **source** (the base color, or a scale for a hue), a
+  **reference** (`parent` = the surface it sits on, or `base` = the root, for overlays), and a
+  target **contrast** vs that reference. Lighter by default, auto-**swapping darker** at caps, with
+  a per-surface **force darker** override. Each row also has a preview **role** and a **show in
+  preview** toggle. Exported as one `.surface-<name>` class per type (+ a `.s-content` wrapper for
+  parent-relative types); surfaces compose by nesting.
 
 **Main — its own two tabs (independent of the left panel):**
 - **Color ramps** — the palette grid, with **Opaque** / **CSS Opacity** comparison toggles, a
@@ -44,18 +48,14 @@ Three columns: **left controls · main (palette + preview) · right detail panel
   rows (per toggle), one swatch per contrast. Rows for one color **touch (0-gap)** for direct
   comparison; contrast columns are labeled. ("Ramp" = the fixed value steps; a "scale" is the
   underlying fluid function.)
-- **Contextual evaluation** — a **Color scale** picker + a **Contrast swatch** picker, then a
-  **nested "doll" of `surfacePreview`s** — each surface renders its contents, with the next
-  surface nested to the right *inside* it, so layers sit visually within their parent. Each card
-  is on that surface's background and shows the generated fill, sample text, the
-  **Dynamic / Opaque / Transparent** 3-up (measured contrast), and a per-surface ΔE readout, all
-  evaluated against that surface. Both pickers
-  **auto-sync** to your latest panel selection (editing `--contrast-300` or selecting `--color2`
-  pre-selects them). Below, a **"Where the color comes from"** section shows every scale as a
-  read-only gradient with **▾ intended** / **▲ source** markers for the selected contrast (against
-  the base surface).
-
-The layout is two columns (controls · main); there is no separate right panel.
+- **Contextual evaluation** — a **Color scale** picker, a **Contrast swatch** picker, a **Nest
+  depth** slider (default 2, max 4), and a **Method detail** toggle (off by default). Renders a
+  **usage-shaped surface tree**: a recursive spine of nesting surfaces (each level shows a
+  "Generated color" swatch), with "applied" surfaces (e.g. info/error) rendered on *every* level
+  and "once" surfaces (overlays) rendered a single time on the base. Turning on **Method detail**
+  reveals the **Dynamic / Opaque / Transparent** 3-up (measured contrast) under each swatch. Below,
+  a **"Where the color comes from"** strip shows every scale as a read-only gradient with
+  **▾ intended** / **▲ source** markers for the selected contrast (against the base surface).
 
 ## The three comparison methods
 
@@ -73,20 +73,20 @@ threshold warning when the tint has drifted far.
 ## Export ("Show CSS")
 
 Adds to a minimal base (`--level-ui/aa/aaa`, `.tint-fg`/`.tint-bg`):
-- **Surface tokens** — a chained `:root` block: private `--_s0…N` carrying the contrast/polarity
-  logic (each lighter than the previous to hit its target contrast, swapping darker at caps),
-  plus public `--bg` / `--layer-1` / … aliases. Assign one to `--bg` on a container.
+- **Surfaces** — `:root { --bg; --surface-base }` plus one **`.surface-<name>`** class per type
+  (contrast/polarity/tint logic baked into the CSS) and a **`.s-content`** wrapper for
+  parent-relative types. Nest surfaces to compose.
 - **`--contrast-100/200/…`** tokens (the swatch values).
-- **One function class per named scale** (`.brand`, `.accent`, …), each baking that scale's
-  ramp anchors; the function reads `--bg` + `--contrast`, picks a source via the (global)
-  extremity curve, and fades it to hit the contrast — pure CSS, exact.
-- A reference hex palette per scale (`--brand-50…950`) for eyeballing.
+- **One function class per named scale** (`.silver`, `.blue`, …), each baking that scale's ramp
+  anchors; the function reads `--bg` + `--contrast`, picks a source via the (global) extremity
+  curve, and fades it to hit the contrast — pure CSS, exact.
+- A reference hex palette per scale (`--blue-50…950`) for eyeballing.
 
 Usage:
 ```html
-<div style="--bg: var(--bg)">   <!-- or any surface: var(--layer-1) -->
-  <span class="brand tint-fg" style="--contrast: var(--contrast-200)">…</span>
-</div>
+<div class="surface-raised"><div class="s-content">
+  <span class="blue tint-fg" style="--contrast: var(--contrast-200)">…</span>
+</div></div>
 ```
 
 Verified: every scale × every `--contrast-*` token resolves to the target contrast exactly,
@@ -100,7 +100,9 @@ matches what ships.
 | `index.html` | Markup only — panels/tabs, and a `<script src="./app.js">`. |
 | `app.js` | All tool logic: state model, color math, generation, panels, export. |
 | `style.css` | Layout (two-column grid), tabs, lists, gradient/stop editor, palette, preview, detail. |
-| `ENHANCEMENT-PLAN.md` | The plan this was built to. |
+| `SURFACES-PLAN.md` | Design + rationale for the Surfaces model (and the preview tree). |
+| `knowledge-transfer/` | Portable, framework-agnostic spec for reimplementing these concepts. |
+| `AGENTS.md` | Entry point for AI agents → points at `knowledge-transfer/`. |
 | `build/compile.mjs` | Legacy static single-scale exporter (superseded by the in-tool export). |
 
 ## Run
