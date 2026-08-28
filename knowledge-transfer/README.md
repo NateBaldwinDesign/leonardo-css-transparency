@@ -30,6 +30,25 @@ The source prototype is a single-page tool: `index.html` (markup), `app.js` (all
 
 ---
 
+## Installing into a target project (for the human)
+
+Agents read what's in the repo they're working in. So **copy this pack into the target project** —
+don't reference it from another repo.
+
+1. Copy the whole **`knowledge-transfer/`** folder into the target repo (root, or `docs/`).
+2. Copy the harness pointer file so every session auto-loads this pack:
+   - **Claude Code** → copy `CLAUDE.md` (it `@import`s `knowledge-transfer/README.md`).
+   - **Cursor / other tools** → copy `AGENTS.md` (same guidance, cross-tool convention).
+   - If the target already has one of these, append its "read `knowledge-transfer/` first" section.
+3. Keep `knowledge-transfer/` at the repo root, or update the `@` import path in `CLAUDE.md`.
+4. Commit them so they're versioned with the project.
+5. First session: still say explicitly *"Read `knowledge-transfer/README.md` then `01`–`12`, honor
+   the criticality tags,"* since large auto-loaded context can be summarized.
+
+**Self-contained:** the exact default data is inlined in `11-state-management.md`, so this pack does
+**not** require the reference `app.js` to reimplement. (Bringing `app.js` is still nice as a
+runnable reference, but not required.)
+
 ## Criticality legend
 
 Every non-obvious decision in this pack is tagged. Apply the tag, not your own priors.

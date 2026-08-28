@@ -29,6 +29,8 @@ and **dogfoods** its own output in every preview.
 4. **No optical/constant-hue mode** — it can't be pure CSS and was removed on purpose.
 
 ## Where things are
+- `CLAUDE.md` — Claude Code auto-loads this; it `@import`s the pack. (This `AGENTS.md` is the
+  equivalent for other tools.)
 - `knowledge-transfer/` — **the authoritative spec** to read and carry into the new project
   (portable). If anything elsewhere conflicts with it, trust this pack and the code.
 - `SURFACES-PLAN.md` — deep design history for surfaces (supporting detail).
