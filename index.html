@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic color system</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <aside class="controls">
+    <h1>Dynamic color system
+      <small>Author color scales and contrast swatches; generate a CSS-only dynamic palette.</small>
+    </h1>
+
+    <div class="field">
+      <label for="bg">Background <span class="val" id="bgVal">#E4E4E7</span></label>
+      <input type="color" id="bg" value="#E4E4E7">
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tabbtn" data-tab="contrast" aria-pressed="true">Contrast swatches</button>
+      <button class="tabbtn" data-tab="scales">Color scales</button>
+      <button class="tabbtn" data-tab="surfaces">Surfaces</button>
+    </div>
+
+    <!-- Tab: Contrast swatches -->
+    <div class="tabpane" id="tabContrast">
+      <p class="hint">Each swatch is a target WCAG ratio, exported as <code>--contrast-100</code>,
+        <code>--contrast-200</code>… (auto-sorted low → high). Drag one to preview it.</p>
+      <div id="contrastList"></div>
+      <button class="addbtn" id="addContrast">+ Add contrast swatch</button>
+    </div>
+
+    <!-- Tab: Color scales -->
+    <div class="tabpane" id="tabScales" hidden>
+      <div class="settings">
+        <div class="field">
+          <label for="side">Contrast side</label>
+          <select id="side">
+            <option value="auto">Auto (whichever side has headroom)</option>
+            <option value="light">Lighter than background</option>
+            <option value="dark">Darker than background</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="eOffset">Extremity offset <span class="val" id="eOffsetVal">0.36</span></label>
+          <input type="range" id="eOffset" min="0" max="1" step="0.01" value="0.36">
+        </div>
+        <div class="field">
+          <label for="eSteep">Extremity × contrast (steepness) <span class="val" id="eSteepVal">−1.00</span></label>
+          <input type="range" id="eSteep" min="-1" max="1" step="0.01" value="-1">
+          <p class="hint">The linear source curve — how extreme the faded source is per contrast.</p>
+        </div>
+      </div>
+      <hr>
+      <div id="scaleList"></div>
+      <button class="addbtn" id="addScale">+ Add color scale</button>
+      <div id="scaleEditor"></div>
+    </div>
+
+    <!-- Tab: Surfaces -->
+    <div class="tabpane" id="tabSurfaces" hidden>
+      <p class="hint">Surfaces are named backgrounds. The base is your Background color above;
+        added surfaces set a contrast relative to the layer above (lighter by default; swaps
+        darker at caps). Renaming sets the CSS var.</p>
+      <div id="surfaceList"></div>
+      <button class="addbtn" id="addSurface">+ Add surface</button>
+    </div>
+
+    <div class="field export">
+      <button id="exportBtn">Show CSS ▾</button>
+      <textarea id="exportOut" hidden readonly></textarea>
+    </div>
+  </aside>
+
+  <main class="stage" id="stage">
+    <div class="tabs maintabs" id="maintabs">
+      <button class="tabbtn" data-mtab="ramps" aria-pressed="true">Color ramps</button>
+      <button class="tabbtn" data-mtab="eval">Contextual evaluation</button>
+    </div>
+    <div id="mtabRamps">
+      <div class="toolbar">
+        <label><input type="checkbox" id="tOpaque"> Opaque scale comparison</label>
+        <label><input type="checkbox" id="tTransparent"> CSS Opacity scale comparison</label>
+        <label><input type="checkbox" id="tValues"> Show contrast values</label>
+        <label><input type="checkbox" id="tOpacity"> Show opacity</label>
+        <label class="surfpick">Surface <select id="rampSurface"></select></label>
+      </div>
+      <div class="palette" id="palette"></div>
+    </div>
+    <div id="mtabEval" hidden>
+      <div class="preview" id="preview"></div>
+      <div class="detail" id="detail"></div>
+    </div>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
