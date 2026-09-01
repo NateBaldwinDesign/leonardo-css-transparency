@@ -33,7 +33,6 @@ and **dogfoods** its own output in every preview.
   equivalent for other tools.)
 - `knowledge-transfer/` — **the authoritative spec** to read and carry into the new project
   (portable). If anything elsewhere conflicts with it, trust this pack and the code.
-- `SURFACES-PLAN.md` — deep design history for surfaces (supporting detail).
 - `app.js` / `index.html` / `style.css` — the reference implementation (vanilla, no build); the
   ultimate ground truth for exact values.
 - `README.md` — end-user overview of the prototype (kept in sync, but the KT pack governs).

@@ -3,8 +3,7 @@
 A **surface** is a named background computed by a **target contrast** vs a **reference**, **tinted**
 from a **source**. Surfaces compose by nesting. "Elevation" = a surface + shadow (future, not built).
 
-> Full design rationale and the conversation history live in `../SURFACES-PLAN.md`. This file is the
-> distilled spec.
+> This file is the self-contained spec for surfaces (distilled from the original design process).
 
 ## Model 🟡
 ```

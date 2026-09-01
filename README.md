@@ -3,9 +3,9 @@
 Authors **color scales** and **contrast swatches**, then generates a **CSS-only dynamic
 color palette**: each color is produced from its scale to hit a target contrast against the
 container's background, at paint time. Compares this "Dynamic" approach against the two old
-ways (opaque scale pick, CSS opacity). Surface design is documented in `SURFACES-PLAN.md`; a
-full, portable spec for reimplementing these concepts lives in `knowledge-transfer/` (start at
-`AGENTS.md`).
+ways (opaque scale pick, CSS opacity). A full, portable spec for reimplementing these concepts
+lives in `knowledge-transfer/` (start at `AGENTS.md`); surfaces are covered in
+`knowledge-transfer/08-surfaces.md`.
 
 ## The core idea
 
@@ -32,7 +32,7 @@ the detail strip lives inside the Contextual-evaluation tab.
   an empty grayscale (one chroma-0 stop) you then color; deleting the last scale resets it to
   one gray stop (name kept). *No
   intended/source markers in this editor.*
-- **Surfaces** — named backgrounds (the "Surfaces v2" model; see `SURFACES-PLAN.md`). The **base**
+- **Surfaces** — named backgrounds (the "Surfaces v2" model; see `knowledge-transfer/08-surfaces.md`). The **base**
   (`bg`, from the Background input; not deletable) plus surface **types**, each defined by
   **tint × reference × contrast**: a **source** (the base color, or a scale for a hue), a
   **reference** (`parent` = the surface it sits on, or `base` = the root, for overlays), and a
@@ -100,8 +100,7 @@ matches what ships.
 | `index.html` | Markup only — panels/tabs, and a `<script src="./app.js">`. |
 | `app.js` | All tool logic: state model, color math, generation, panels, export. |
 | `style.css` | Layout (two-column grid), tabs, lists, gradient/stop editor, palette, preview, detail. |
-| `SURFACES-PLAN.md` | Design + rationale for the Surfaces model (and the preview tree). |
-| `knowledge-transfer/` | Portable, framework-agnostic spec for reimplementing these concepts. |
+| `knowledge-transfer/` | Portable, framework-agnostic spec for reimplementing these concepts (surfaces in `08`). |
 | `AGENTS.md` | Entry point for AI agents → points at `knowledge-transfer/`. |
 | `build/compile.mjs` | Legacy static single-scale exporter (superseded by the in-tool export). |
 
